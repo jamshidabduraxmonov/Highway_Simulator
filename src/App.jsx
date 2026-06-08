@@ -7,7 +7,7 @@ import {useRef, useState, useEffect} from 'react';
 export default function App() {
 
   const [coordinates, setCoordinates] = useState([25.1201526, 55.3654066]);
-  // const coordinatesRef = useRef(null);
+  const [smoothCoordinates, setSmoothCoordinates] = useState([]);
 
   console.log("render");
 
@@ -48,18 +48,49 @@ export default function App() {
     { lat: 25.1619160, lon: 55.3917574 }
   ];
 
+   function smoothCoordinator() {
+        let temp = [];
+      for(let i = 0; i < roadCor.length; i++){
+        if(i < (roadCor.length - 1)){
+          const latDifference = (roadCor[i+1].lat - roadCor[i].lat)/10;
+          const lonDifference = (roadCor[i+1].lon - roadCor[i].lon)/10;
+          console.log('latDiff: ', latDifference);
+
+        for(let j = 0; j <=10; j++ ){
+          const smoothLat = roadCor[i].lat + latDifference*j;
+          const smoothLon = roadCor[i].lon + lonDifference*j;
+          temp.push({lat: smoothLat, lon: smoothLon});
+        }   
+      }
+   
+    }
+
+    setSmoothCoordinates(temp);
+  }
+
   function corLoader(order){
-    setCoordinates([roadCor[order].lat, roadCor[order].lon]);
+    console.log("order: ", order);
+    console.log("smoothCoordinates length: ", smoothCoordinates.length);
+    setCoordinates([smoothCoordinates[order].lat, smoothCoordinates[order].lon]);
     console.log(order);
-    console.log(coordinates);
+    console.log(smoothCoordinates);
   }
 
   const orderRef = useRef(0);
-  useEffect(()=> {
-    setInterval(() => corLoader(orderRef.current++), 1000)
-  }, []);
 
-  console.log(coordinates);
+  useEffect(()=> {
+    smoothCoordinator();
+  }, [])
+
+  useEffect(()=> {
+    if(smoothCoordinates.length > 0){
+      console.log("interval created!")
+      setInterval(() => corLoader(orderRef.current++), 100)
+    }
+  }, [smoothCoordinates]);
+
+ 
+
 
 
 
