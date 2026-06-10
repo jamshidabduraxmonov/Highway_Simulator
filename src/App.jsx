@@ -1,13 +1,30 @@
 import { MapContainer } from 'react-leaflet/MapContainer'
 import { TileLayer } from 'react-leaflet/TileLayer'
 import { useMap } from 'react-leaflet/hooks'
-import { Marker, Popup  } from 'react-leaflet'
+import { Marker, Popup, useMapEvents } from 'react-leaflet'
 import {useRef, useState, useEffect} from 'react';
+
+
+
+  function ClickTracker ({setClickedPosition}) {
+    useMapEvents({
+      click(e){
+        setClickedPosition(e.latlng);
+      }
+    });
+
+    return null;
+  }
+
+
+
+
 
 export default function App() {
 
   const [coordinates, setCoordinates] = useState([25.1201526, 55.3654066]);
   const [smoothCoordinates, setSmoothCoordinates] = useState([]);
+  const [clickedPosition, setClickedPosition ] = useState([]);
 
   console.log("render");
 
@@ -89,6 +106,8 @@ export default function App() {
     }
   }, [smoothCoordinates]);
 
+
+  console.log("Clicked point: ", clickedPosition);
  
 
 
@@ -107,6 +126,8 @@ export default function App() {
               A pretty CSS3 popup. <br /> Easily customizable.
             </Popup>
         </Marker>
+
+        <ClickTracker setClickedPosition={setClickedPosition} />
     </MapContainer>
 
     </>
