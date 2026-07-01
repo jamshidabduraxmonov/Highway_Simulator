@@ -24,7 +24,9 @@ export default function App() {
 
   const [coordinates, setCoordinates] = useState([25.1201526, 55.3654066]);
   const [smoothCoordinates, setSmoothCoordinates] = useState([]);
-const [clickedPosition, setClickedPosition ] = useState({lat: 25.1201526, lng: 55.3654066});
+  const [clickedPosition, setClickedPosition ] = useState({lat: 25.1201526, lng: 55.3654066});
+  const [initialPosition, setInitialPosition] = useState({lat: 25.1201526, lng: 55.3654066});
+  const [roadCoordinates, setRoadCoordinates] = useState();
 
   console.log("render");
 
@@ -73,7 +75,7 @@ const [clickedPosition, setClickedPosition ] = useState({lat: 25.1201526, lng: 5
           const lonDifference = (roadCor[i+1].lon - roadCor[i].lon)/10;
           console.log('latDiff: ', latDifference);
 
-        for(let j = 0; j <=10; j++ ){
+        for(let j = 0; j<=10; j++ ){
           const smoothLat = roadCor[i].lat + latDifference*j;
           const smoothLon = roadCor[i].lon + lonDifference*j;
           temp.push({lat: smoothLat, lon: smoothLon});
@@ -91,6 +93,7 @@ const [clickedPosition, setClickedPosition ] = useState({lat: 25.1201526, lng: 5
     setCoordinates([smoothCoordinates[order].lat, smoothCoordinates[order].lon]);
     console.log(order);
     console.log(smoothCoordinates);
+    console.log('api response: ',roadCoordinates)
   }
 
   const orderRef = useRef(0);
@@ -101,14 +104,63 @@ const [clickedPosition, setClickedPosition ] = useState({lat: 25.1201526, lng: 5
 
   useEffect(()=> {
     if(smoothCoordinates.length > 0){
-      console.log("interval created!")
-      setInterval(() => corLoader(orderRef.current++), 100)
+      console.log("interval created!");
+      setInterval(() => corLoader(orderRef.current++), 100);
     }
   }, [smoothCoordinates]);
 
 
   console.log("Clicked point: ", clickedPosition);
  
+
+
+  async function postData(data){
+    try{
+      const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjU1ZDhlNWQ1Yzg3YTRkNTQ5MWZmNzM3MjBmNTc1OGEyIiwiaCI6Im11cm11cjY0In0='
+        },
+
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      setRoadCoordinates(result);
+      console.log("Coordinates Uploaded: ", result);
+
+
+
+      
+    }catch(error){
+      console.error('Network or Parsing Error: ', error);
+    }
+  }
+
+  const points = {
+    "coordinates": [
+      [25.1201526, 55.3654066],
+      [25.1619160, 55.3917574]
+    ]
+  }
+
+  useEffect(()=> {
+    postData(points);
+  }, [])
+
+
+/*
+  1) Road Coordinates => Smooth Coordinates generated when
+
+
+
+*/
+
+
+
+
+
 
 
 
