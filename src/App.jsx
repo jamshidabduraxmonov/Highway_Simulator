@@ -26,7 +26,7 @@ export default function App() {
   const [smoothCoordinates, setSmoothCoordinates] = useState([]);
   const [clickedPosition, setClickedPosition ] = useState({lat: 25.1201526, lng: 55.3654066});
   const [initialPosition, setInitialPosition] = useState({lat: 25.1201526, lng: 55.3654066});
-  const [roadCoordinates, setRoadCoordinates] = useState();
+  const [roadCoordinates, setRoadCoordinates] = useState([]);
 
   console.log("render");
 
@@ -69,15 +69,15 @@ export default function App() {
 
    function smoothCoordinator() {
         let temp = [];
-      for(let i = 0; i < roadCor.length; i++){
-        if(i < (roadCor.length - 1)){
-          const latDifference = (roadCor[i+1].lat - roadCor[i].lat)/10;
-          const lonDifference = (roadCor[i+1].lon - roadCor[i].lon)/10;
+      for(let i = 0; i < roadCoordinates.length; i++){
+        if(i < (roadCoordinates.length - 1)){
+          const latDifference = (roadCoordinates[i+1][0] - roadCoordinates[i][0])/10;
+          const lonDifference = (roadCoordinates[i+1][1] - roadCoordinates[i][1])/10;
           console.log('latDiff: ', latDifference);
 
         for(let j = 0; j<=10; j++ ){
-          const smoothLat = roadCor[i].lat + latDifference*j;
-          const smoothLon = roadCor[i].lon + lonDifference*j;
+          const smoothLat = roadCoordinates[i][0] + latDifference*j;
+          const smoothLon = roadCoordinates[i][1] + lonDifference*j;
           temp.push({lat: smoothLat, lon: smoothLon});
         }   
       }
@@ -88,19 +88,22 @@ export default function App() {
   }
 
   function corLoader(order){
-    console.log("order: ", order);
-    console.log("smoothCoordinates length: ", smoothCoordinates.length);
+    // console.log("order: ", order);]
+    // console.log("smoothCoordinates length: ", smoothCoordinates.length);
     setCoordinates([smoothCoordinates[order].lat, smoothCoordinates[order].lon]);
-    console.log(order);
-    console.log(smoothCoordinates);
-    console.log('api response: ',roadCoordinates)
+    // console.log(order);
+    // console.log(smoothCoordinates);
   }
 
   const orderRef = useRef(0);
 
   useEffect(()=> {
-    smoothCoordinator();
-  }, [])
+
+    
+      smoothCoordinator();
+    
+
+  }, [roadCoordinates])
 
   useEffect(()=> {
     if(smoothCoordinates.length > 0){
@@ -112,6 +115,7 @@ export default function App() {
 
   console.log("Clicked point: ", clickedPosition);
  
+  console.log('Road Coordinates: ',roadCoordinates);
 
 
   async function postData(data){
@@ -127,7 +131,7 @@ export default function App() {
       });
 
       const result = await response.json();
-      setRoadCoordinates(result);
+      setRoadCoordinates(result.features[0].geometry.coordinates);
       console.log("Coordinates Uploaded: ", result);
 
 
@@ -140,8 +144,8 @@ export default function App() {
 
   const points = {
     "coordinates": [
-      [25.1201526, 55.3654066],
-      [25.1619160, 55.3917574]
+      [54.366669, 24.466667],
+      [55.296249, 25.276987]
     ]
   }
 
@@ -151,7 +155,9 @@ export default function App() {
 
 
 /*
-  1) Road Coordinates => Smooth Coordinates generated when
+  1) Road Coordinates => Smooth Coordinates generated when page 
+      loaded and pushed into 'smoothCoordinates' state =>  interval is created =>
+        interval renews the coordinates in the 'coordinates' state
 
 
 
