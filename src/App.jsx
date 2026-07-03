@@ -90,7 +90,7 @@ export default function App() {
   function corLoader(order){
     // console.log("order: ", order);]
     // console.log("smoothCoordinates length: ", smoothCoordinates.length);
-    setCoordinates([smoothCoordinates[order].lat, smoothCoordinates[order].lon]);
+    setCoordinates([smoothCoordinates[order].lon, smoothCoordinates[order].lat]);
     // console.log(order);
     // console.log(smoothCoordinates);
   }
@@ -142,15 +142,35 @@ export default function App() {
     }
   }
 
-  const points = {
+
+  const points = useRef();
+
+  useEffect(()=> {
+    points.current = {
     "coordinates": [
       [54.366669, 24.466667],
-      [55.296249, 25.276987]
+      [clickedPosition.lng, clickedPosition.lat]
     ]
   }
 
+  console.log(clickedPosition.lng, clickedPosition.lat);
+  }, [clickedPosition])
+  
+
   useEffect(()=> {
-    postData(points);
+
+    const handleScreenClick = (event) => {
+      postData(points.current);
+    };
+
+    window.addEventListener('click', handleScreenClick);
+
+
+    return ()=> {
+      window.removeEventListener('click', handleScreenClick);
+    };
+
+    // postData(points);
   }, [])
 
 
@@ -158,6 +178,9 @@ export default function App() {
   1) Road Coordinates => Smooth Coordinates generated when page 
       loaded and pushed into 'smoothCoordinates' state =>  interval is created =>
         interval renews the coordinates in the 'coordinates' state
+
+  2) Screen is clicked => 'clickedPosition' state gets the coordinates of click =>
+
 
 
 
@@ -174,7 +197,7 @@ export default function App() {
 
   return(
     <>
-      <MapContainer center={[25.1201526, 55.3654066]} zoom={14} scrollWheelZoom={false} style={{ height: "100vh", width: "100%"}} >
+      <MapContainer center={[25.1201526, 55.3654066]} zoom={11} scrollWheelZoom={false} style={{ height: "100vh", width: "100%"}} >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url='https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
